@@ -9,19 +9,10 @@ environment:
   DOTNETCLI_ZIP_URL: https://go.microsoft.com/fwlink/?LinkID=831469
 
 install:
-  # see https://github.com/enricosada/fsharp-dotnet-cli-samples/blob/master/appveyor.yml
-  # Download install script to install .NET cli in .dotnet dir
-  - ps: $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetcli"
-  - ps: $env:DOTNET_ZIP_FILE = "$pwd\dotnet.zip"
-  - ps: (New-Object Net.WebClient).DownloadFile("$env:DOTNETCLI_ZIP_URL", "$env:DOTNET_ZIP_FILE")
-  - 7z x %DOTNET_ZIP_FILE% -y -o"%DOTNET_INSTALL_DIR%"
-  - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
-
+  - powershell -NoProfile -ExecutionPolicy unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -useb 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.0.2"
+  - dotnet --info
 
 # need build_script, or appveyor starts looking for a sln file
 build_script:
-  - dotnet --info
   - dotnet restore
-
-test_script:
   - dotnet run
