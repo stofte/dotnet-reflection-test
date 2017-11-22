@@ -21,7 +21,8 @@ env:
 before_install:
  - ulimit -n 1024
  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
- - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 2.0.2
+ - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.0.2 --install-dir ~/.dotnetcli
+ - PATH="~/.dotnetcli:$PATH"
 
 install:
  - dotnet --info
