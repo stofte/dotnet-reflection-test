@@ -9,6 +9,7 @@ environment:
   DOTNETCLI_ZIP_URL: https://go.microsoft.com/fwlink/?LinkID=831469
 
 install:
+  # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
   - powershell -NoProfile -ExecutionPolicy unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -useb 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.0.2"
   - dotnet --info
 

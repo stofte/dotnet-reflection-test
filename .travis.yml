@@ -1,0 +1,31 @@
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    packages:
+    - gettext
+    - libcurl4-openssl-dev
+    - libicu-dev
+    - libssl-dev
+    - libunwind8
+    - zlib1g
+
+env:
+  global:
+    - CLI_VERSION=latest
+    - CLI_ARCH=x64
+    - DOTNETCLI_URL=https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh
+    - DOTNET_INSTALL_DIR=$TRAVIS_BUILD_DIR/.dotnetcli
+
+before_install:
+ - ulimit -n 1024
+ # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script
+ - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 2.0.2
+
+install:
+ - dotnet --info
+
+script:
+ - dotnet restore
+ - dotnet run
