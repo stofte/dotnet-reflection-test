@@ -22,21 +22,12 @@
         {
             var t = BuildType();
             var ms = new MemoryStream();
-            var o = Activator.CreateInstance(t, new object[] { ms });
+            var o = Activator.CreateInstance(t, new object[] { ms }) as IShared;
             
-            var m1 = o.GetType().GetMethod("SomeMethod1");
-            var retVal1 = (int)m1.Invoke(o, new object[] { 5 });
-            Console.WriteLine("SomeMethod1: {0}", retVal1);
-
-            var m2 = o.GetType().GetMethod("SomeMethod2");
-            var retVal2 = (string)m2.Invoke(o, new object[] { 5 });
-            Console.WriteLine("SomeMethod2: {0}", retVal2);
-
-            var m3 = o.GetType().GetMethod("SomeMethod3");
-            var retVal3 = (int)m3.Invoke(o, new object[] { "hej mor" });
-            Console.WriteLine("SomeMethod3: {0}", retVal3);
-            var streamString = Encoding.Default.GetString(ms.ToArray());
-            Console.WriteLine("Stream: {0}", streamString);
+            Console.WriteLine("SomeMethod1: {0}", o.SomeMethod1(5));
+            Console.WriteLine("SomeMethod2: {0}", o.SomeMethod2(5));
+            Console.WriteLine("SomeMethod3: {0}", o.SomeMethod3("hej mor"));
+            Console.WriteLine("Stream: {0}", Encoding.Default.GetString(ms.ToArray()));
         }
 
         static void Main(string[] args)
