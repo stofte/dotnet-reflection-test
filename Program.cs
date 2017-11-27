@@ -15,9 +15,6 @@
 
     class Program
     {
-        private delegate long SquareItInvoker(int input);
-        private delegate TReturn OneParameter<TReturn, TParameter0>(TParameter0 p0);
-        
         void Start2()
         {
             var t = BuildType();
@@ -138,6 +135,8 @@
             mil.Emit(OpCodes.Ret);
         }
 
+        private delegate TReturn OneParameter<TReturn, TParameter0>(TParameter0 p0);
+        
         void BuildDyn()
         {
             Type[] methodArgs = { typeof(int) };
@@ -149,7 +148,8 @@
             il.Emit(OpCodes.Mul);
             il.Emit(OpCodes.Ret);
             OneParameter<long, int> invokeSquareIt = (OneParameter<long, int>)squareIt.CreateDelegate(typeof(OneParameter<long, int>));
-            Console.WriteLine("123456789 squared = {0}", invokeSquareIt(123456789));
+            var result = invokeSquareIt(42);
+            Console.WriteLine("42 squared = {0}", result);
         }
     }
 }
