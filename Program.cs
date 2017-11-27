@@ -33,6 +33,7 @@
         static void Main(string[] args)
         {
             new Program().Start2();
+            new Program().BuildDyn();
         }
 
         Type BuildType()
