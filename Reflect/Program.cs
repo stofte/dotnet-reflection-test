@@ -43,6 +43,7 @@
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(projPath);
             var refs = analyzer.GetReferences();
+            Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
             foreach(var r in refs)
             {
                 Console.WriteLine(r);
