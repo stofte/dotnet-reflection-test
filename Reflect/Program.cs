@@ -46,7 +46,7 @@
             Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
             foreach(var r in refs)
             {
-                Console.WriteLine(r);
+                // Console.WriteLine(r);
             }
         }
 
@@ -60,6 +60,8 @@
 
         string ProjectPath()
         {
+            var otherBase = Assembly.GetEntryAssembly().CodeBase;
+            Console.WriteLine("Asm CodeBase: {0}", otherBase);
             var basePath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
             // f5
             if (basePath.EndsWith(Path.Combine("Reflect", "bin", "Debug", "netcoreapp2.0")))
