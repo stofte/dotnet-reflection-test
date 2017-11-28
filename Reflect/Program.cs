@@ -31,23 +31,49 @@
             Console.WriteLine("Stream: {0}", Encoding.Default.GetString(ms.ToArray()));
         }
 
-        static void Main(string[] args)
+        void StartRoslynStuff()
         {
-            Console.WriteLine(new Class1().Foo);
-            new Program().Start2();
-            new Program().BuildDyn();
             var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
             var comp = new Compiler(new LibraryLoader(loadCtx));
             comp.GetReferences();
 
             // https://github.com/daveaglick/Buildalyzer
+            
+            var projPath = Path.Combine(ProjectPath(), "Entity", "Entity.csproj");
             var manager = new AnalyzerManager();
-            var analyzer = manager.GetProject(@"C:\src\dotnet-reflection-test\Entity\Entity.csproj");
+            var analyzer = manager.GetProject(projPath);
             var refs = analyzer.GetReferences();
             foreach(var r in refs)
             {
                 Console.WriteLine(r);
             }
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine(new Class1().Foo);
+            new Program().Start2();
+            new Program().BuildDyn();
+            new Program().StartRoslynStuff();
+        }
+
+        string ProjectPath()
+        {
+            var basePath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+            // f5
+            if (basePath.EndsWith(Path.Combine("Reflect", "bin", "Debug", "netcoreapp2.0")))
+            {
+                basePath = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", ".."));
+            }
+            else if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("APPVEYOR")))
+            {
+                basePath = Environment.GetEnvironmentVariable("APPVEYOR_BUILD_FOLDER");
+            }
+            else if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TRAVIS")))
+            {
+                basePath = Environment.GetEnvironmentVariable("TRAVIS_BUILD_DIR");
+            }
+            return basePath;
         }
 
         Type BuildType()
