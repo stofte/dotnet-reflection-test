@@ -15,5 +15,7 @@ install:
 
 # need build_script, or appveyor starts looking for a sln file
 build_script:
-  - dotnet restore
-  - dotnet run
+  - dotnet restore Entity
+  - dotnet restore Roslyn
+  - dotnet restore Reflect
+  - dotnet run -p Reflect

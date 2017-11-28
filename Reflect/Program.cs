@@ -1,11 +1,15 @@
-﻿namespace back
+﻿namespace Reflect
 {
     using System;
     using System.IO;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Runtime.Loader;
     using System.Text;
-    
+    using Buildalyzer;
+    using Entity;
+    using Roslyn;
+
     public interface IShared
     {
         int SomeMethod1(int i);
@@ -29,8 +33,21 @@
 
         static void Main(string[] args)
         {
+            Console.WriteLine(new Class1().Foo);
             new Program().Start2();
             new Program().BuildDyn();
+            var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
+            var comp = new Compiler(new LibraryLoader(loadCtx));
+            comp.GetReferences();
+
+            // https://github.com/daveaglick/Buildalyzer
+            var manager = new AnalyzerManager();
+            var analyzer = manager.GetProject(@"C:\src\dotnet-reflection-test\Entity\Entity.csproj");
+            var refs = analyzer.GetReferences();
+            foreach(var r in refs)
+            {
+                Console.WriteLine(r);
+            }
         }
 
         Type BuildType()
@@ -135,6 +152,8 @@
             mil.Emit(OpCodes.Ret);
         }
 
+
+        // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/how-to-define-and-execute-dynamic-methods
         private delegate TReturn OneParameter<TReturn, TParameter0>(TParameter0 p0);
         
         void BuildDyn()

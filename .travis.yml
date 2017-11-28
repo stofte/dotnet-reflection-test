@@ -28,5 +28,7 @@ install:
  - dotnet --info
 
 script:
- - dotnet restore
- - dotnet run
+ - dotnet restore Entity
+ - dotnet restore Roslyn
+ - dotnet restore Reflect
+ - dotnet run -p Reflect
