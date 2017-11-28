@@ -20,4 +20,5 @@ build_script:
   - dotnet restore Reflect
   - dotnet publish -r win10-x64 -f netcoreapp2.0 Reflect\Reflect.csproj -o "%APPVEYOR_BUILD_FOLDER%\build"
   - cd %APPVEYOR_BUILD_FOLDER%\build
+  - dir
   - Reflect
