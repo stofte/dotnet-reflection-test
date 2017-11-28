@@ -32,3 +32,6 @@ script:
  - dotnet restore Roslyn
  - dotnet restore Reflect
  - dotnet publish -r ubuntu.14.04-x64 -f netcoreapp2.0 Reflect/Reflect.csproj -o "$TRAVIS_BUILD_DIR/build"
+ - ls $TRAVIS_BUILD_DIR/build
+ - chmod +x $TRAVIS_BUILD_DIR/build/Reflect
+ - $TRAVIS_BUILD_DIR/build/Reflect
