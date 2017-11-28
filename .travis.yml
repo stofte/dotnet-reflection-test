@@ -31,5 +31,4 @@ script:
  - dotnet restore Entity
  - dotnet restore Roslyn
  - dotnet restore Reflect
- - dotnet run -p Reflect
- - dotnet publish -r ubuntu.14.04-x64 -f netcoreapp2.0 Reflect\Reflect.csproj
+ - dotnet publish -r ubuntu.14.04-x64 -f netcoreapp2.0 Reflect\Reflect.csproj -o "$TRAVIS_BUILD_DIR/build"
