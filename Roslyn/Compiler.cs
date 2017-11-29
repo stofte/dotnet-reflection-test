@@ -8,6 +8,7 @@
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Emit;
     using System.Collections.Generic;
+    using System.Text;
 
     public interface IShared
     {
@@ -94,7 +95,7 @@ public class MyClass : IShared
             {
                 if (diag.Severity == DiagnosticSeverity.Error)
                 {
-                    Console.WriteLine("Error: {0}", diag.GetMessage());
+                    //Console.WriteLine("Error: {0}", diag.GetMessage());
                 }
             }
             stream.Position = 0;
