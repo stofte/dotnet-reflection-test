@@ -84,6 +84,7 @@
             var list = new List<string>();
             foreach(var r in refs)
             {
+                Console.WriteLine("Ref: {0}", r);
                 list.Add(r);
             }
             return list;
