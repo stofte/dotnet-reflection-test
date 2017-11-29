@@ -1,13 +1,17 @@
 ﻿namespace Reflect
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
     using System.Runtime.Loader;
     using System.Text;
     using Buildalyzer;
     using Entity;
+    using Microsoft.Extensions.DependencyModel;
+    using Microsoft.Extensions.PlatformAbstractions;
     using Roslyn;
 
     public interface IShared
@@ -19,7 +23,15 @@
 
     class Program
     {
-        void Start2()
+        
+        static void Main(string[] args)
+        {
+            new Program().StartReflection();
+            new Program().StartDynamicMethod();
+            new Program().StartCompiler();
+        }
+        
+        void StartReflection()
         {
             var t = BuildType();
             var ms = new MemoryStream();
@@ -31,32 +43,52 @@
             Console.WriteLine("Stream: {0}", Encoding.Default.GetString(ms.ToArray()));
         }
 
-        void StartRoslynStuff()
+        public IEnumerable<Assembly> GetReferencingAssemblies(string assemblyName)
+        {
+            var assemblies = new List<Assembly>();
+            var dependencies = DependencyContext.Default.RuntimeLibraries;
+            foreach (var library in dependencies)
+            {
+                var assembly = Assembly.Load(new AssemblyName(library.Name));
+                var ts = assembly.ExportedTypes;
+                foreach(var t in ts)
+                {
+                    Console.WriteLine(string.Format("Type: {0}", t.FullName));
+                }
+                assemblies.Add(assembly);
+            }
+            return assemblies;
+        }
+
+        private static bool IsCandidateLibrary(RuntimeLibrary library, string assemblyName)
+        {
+            return library.Name == (assemblyName)
+                || library.Dependencies.Any(d => d.Name.StartsWith(assemblyName));
+        }
+
+        void StartCompiler()
         {
             var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
             var comp = new Compiler(new LibraryLoader(loadCtx));
-            comp.GetReferences();
+            comp.StartStuff(GetReferences());
+        }
 
+        IEnumerable<string> GetReferences()
+        {
             // https://github.com/daveaglick/Buildalyzer
-            
             var projPath = Path.Combine(ProjectPath(), "Entity", "Entity.csproj");
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(projPath);
             var refs = analyzer.GetReferences();
             Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
+            var list = new List<string>();
             foreach(var r in refs)
             {
-                // Console.WriteLine(r);
+                list.Add(r);
             }
+            return list;
         }
 
-        static void Main(string[] args)
-        {
-            Console.WriteLine(new Class1().Foo);
-            new Program().Start2();
-            new Program().BuildDyn();
-            new Program().StartRoslynStuff();
-        }
 
         string ProjectPath()
         {
@@ -185,7 +217,7 @@
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/how-to-define-and-execute-dynamic-methods
         private delegate TReturn OneParameter<TReturn, TParameter0>(TParameter0 p0);
         
-        void BuildDyn()
+        void StartDynamicMethod()
         {
             Type[] methodArgs = { typeof(int) };
             DynamicMethod squareIt = new DynamicMethod("SquareIt", typeof(long), methodArgs, typeof(Program).Module);

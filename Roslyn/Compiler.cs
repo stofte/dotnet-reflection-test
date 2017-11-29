@@ -9,6 +9,11 @@
     using Microsoft.CodeAnalysis.Emit;
     using System.Collections.Generic;
 
+    public interface IShared
+    {
+        int GetAnswer();
+    }
+
     public class Compiler
     {
         ILibraryLoader _libraryLoader;
@@ -18,9 +23,38 @@
             _libraryLoader = libraryLoader;
         }
 
+        IEnumerable<MetadataReference> References;
+
+        public void StartStuff(IEnumerable<string> references)
+        {
+            var rs = new List<MetadataReference>();
+            foreach(var r in references)
+            {
+                rs.Add(MetadataReference.CreateFromFile(r));
+            }
+            References = rs;
+            var res = Build("hejmor", Source);
+            var newType = res.Item1.ExportedTypes.FirstOrDefault(x => x.Name == "MyClass");
+            var programInstance = (IShared) Activator.CreateInstance(newType);
+            var methodValue = programInstance.GetAnswer();
+            Console.WriteLine("Compiler.StartStuff: {0}", methodValue);
+        }
+
+        string Source = @"
+using System;
+using Roslyn;
+
+public class MyClass : IShared
+{
+    public int GetAnswer()
+    {
+        Console.WriteLine(""Hello World!"");
+        return 42;
+    }   
+}";
+
         Tuple<Assembly, MetadataReference> Build(string assmName, string source, MetadataReference schema = null)
         {
-            var references = GetReferences();
             var currentAssembly = typeof(Compiler).GetTypeInfo().Assembly;
             var fileUri = "file:///";
             // pretty dumb test for windows platform
@@ -37,11 +71,12 @@
 
             var compilation = CSharpCompilation.Create(assmName)
                 .WithOptions(compilerOptions)
-                .WithReferences(references.Concat(new [] {
+                .WithReferences(References.Concat(new [] {
                     MetadataReference.CreateFromFile(asmPath) 
-                }.Concat(schema != null ? 
-                    new [] { schema } : new MetadataReference[] {}
-                )))
+                }))
+                // .Concat(schema != null ? 
+                //     new [] { schema } : new MetadataReference[] {}
+                // )))
                 .AddSyntaxTrees(trees);
 
             var stream = new MemoryStream();
@@ -64,7 +99,7 @@
         {
             var adws = new AdhocWorkspace();
             var refs = adws.CurrentSolution.Projects.SelectMany(x => x.MetadataReferences);
-            return null;
+            return new MetadataReference[] { };
         }
     }
 }
