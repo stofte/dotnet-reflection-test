@@ -10,7 +10,9 @@
     using System.Text;
     using Buildalyzer;
     using Entity;
+    using Microsoft.Build.Framework;
     using Microsoft.Extensions.DependencyModel;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.PlatformAbstractions;
     using Roslyn;
 
@@ -77,8 +79,11 @@
         {
             // https://github.com/daveaglick/Buildalyzer
             var projPath = Path.Combine(ProjectPath(), "Entity", "Entity.csproj");
-            var manager = new AnalyzerManager();
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddConsole();
+            var manager = new AnalyzerManager(loggerFactory, LoggerVerbosity.Detailed);
             var analyzer = manager.GetProject(projPath);
+            analyzer.Load();
             var refs = analyzer.GetReferences();
             Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
             var list = new List<string>();
