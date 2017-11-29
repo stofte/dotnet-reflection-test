@@ -27,17 +27,22 @@
 
         public void StartStuff(IEnumerable<string> references)
         {
+            var totalBytes = 0;
             var rs = new List<MetadataReference>();
             foreach(var r in references)
             {
-                rs.Add(MetadataReference.CreateFromFile(r));
+                var bytes = File.ReadAllBytes(r);
+                totalBytes += bytes.Length;
+                var stream = new MemoryStream(bytes);
+                rs.Add(MetadataReference.CreateFromStream(stream));
             }
             References = rs;
             var res = Build("hejmor", Source);
             var newType = res.Item1.ExportedTypes.FirstOrDefault(x => x.Name == "MyClass");
             var programInstance = (IShared) Activator.CreateInstance(newType);
             var methodValue = programInstance.GetAnswer();
-            Console.WriteLine("Compiler.StartStuff: {0}", methodValue);
+            Console.WriteLine("Compiler.StartStuff: generated return val => {0}", methodValue);
+            Console.WriteLine("Compiler.StartStuff: metadata mb => {0}", totalBytes / 1024d / 1024d);
         }
 
         string Source = @"

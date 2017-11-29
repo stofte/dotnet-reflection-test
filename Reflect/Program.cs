@@ -11,9 +11,11 @@
     using Buildalyzer;
     using Entity;
     using Microsoft.Build.Framework;
+    using Microsoft.CodeAnalysis;
     using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.PlatformAbstractions;
+    using Newtonsoft.Json;
     using Roslyn;
 
     public interface IShared
@@ -78,21 +80,15 @@
         IEnumerable<string> GetReferences()
         {
             // https://github.com/daveaglick/Buildalyzer
-            var projPath = Path.Combine(ProjectPath(), "Entity", "Entity.csproj");
+            var projPath = Path.Combine(ProjectPath(), "Reflect", "Reflect.csproj");
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole();
-            var manager = new AnalyzerManager(loggerFactory, LoggerVerbosity.Detailed);
+            var manager = new AnalyzerManager(loggerFactory, LoggerVerbosity.Quiet);
             var analyzer = manager.GetProject(projPath);
             analyzer.Load();
             var refs = analyzer.GetReferences();
             Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
-            var list = new List<string>();
-            foreach(var r in refs)
-            {
-                Console.WriteLine("Ref: {0}", r);
-                list.Add(r);
-            }
-            return list;
+            return refs;
         }
 
 
