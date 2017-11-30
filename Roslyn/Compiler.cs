@@ -63,6 +63,7 @@ public class MyClass : IShared
             var rs = new List<MetadataReference>();
             foreach(var r in references)
             {
+                Console.WriteLine("MetaRef: {0}", r);
                 // first, copy the file to some random place
                 var newFile = Path.GetTempFileName();
                 File.Copy(r, newFile, true);
@@ -78,15 +79,6 @@ public class MyClass : IShared
 
         public Tuple<Assembly, MetadataReference> Build(string assmName, string source, MetadataReference schema = null)
         {
-            var currentAssembly = typeof(Compiler).GetTypeInfo().Assembly;
-            var fileUri = "file:///";
-            // pretty dumb test for windows platform
-            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TEMP")))
-            {
-                fileUri = "file://";
-            }
-            var asmPath = Path.GetFullPath(currentAssembly.CodeBase.Substring(fileUri.Length));
-
             var compilerOptions = new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary);
             var trees = new SyntaxTree[] {
                 CSharpSyntaxTree.ParseText(source),
