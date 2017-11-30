@@ -59,6 +59,7 @@ public class MyClass : IShared
 
         public int SetReferences(IEnumerable<string> references)
         {
+            Environment.Exit(0);
             var totalBytes = 0;
             var rs = new List<MetadataReference>();
             foreach(var r in references)
