@@ -66,7 +66,7 @@ public class MyClass : IShared
             foreach(var r in references)
             {
                 var exists = File.Exists(r);
-                Console.WriteLine("MetaRef: {0}", r);
+                Console.WriteLine("MetaRef: {0} (exists? {0})", r, exists ? "yes" : "no");
                 // first, copy the file to some random place
                 var newFile = Path.GetTempFileName();
                 File.Copy(r, newFile, true);
