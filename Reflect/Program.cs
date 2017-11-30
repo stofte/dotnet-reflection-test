@@ -39,7 +39,6 @@
                 {
                     Console.WriteLine("File: {0}", f);
                 }
-                Environment.Exit(42);
             }
             catch
             { }
