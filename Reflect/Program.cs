@@ -40,12 +40,22 @@
             // p.StartCompilerFail(p.GetReferences());
         }
 
+        string GetSqliteConnectionString()
+        {
+            var connStr = Environment.GetEnvironmentVariable("SQLITE_CONNECTION_STRING");
+            if (string.IsNullOrWhiteSpace(connStr))
+            {
+                return @"Data Source=C:\src\dotnet-reflection-test\world.sqlite";
+            }
+            return connStr;
+        }
+
         void StartEFCoreFlow()
         {
             IEnumerable<string> references = GetReferences();
             var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
             var comp = new Compiler(new LibraryLoader(loadCtx));
-            var schemaSrc = SchemaSource.Get(@"Data Source=C:\src\dotnet-reflection-test\world.sqlite", "DbSchema");
+            var schemaSrc = SchemaSource.Get(GetSqliteConnectionString(), "DbSchema");
             Console.WriteLine(schemaSrc);
             comp.SetReferences(references);
             var schemaBuild = comp.Build("DbSchema", schemaSrc);
