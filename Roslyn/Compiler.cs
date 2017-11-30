@@ -72,13 +72,13 @@ public class MyClass : IShared
                     Environment.Exit(0);
                 }
                 // first, copy the file to some random place
-                var newFile = Path.GetTempFileName();
-                File.Copy(r, newFile, true);
-                var bytes = File.ReadAllBytes(newFile);
-                File.Delete(newFile);
-                totalBytes += bytes.Length;
-                var stream = new MemoryStream(bytes);
-                rs.Add(MetadataReference.CreateFromStream(stream));
+                // var newFile = Path.GetTempFileName();
+                // File.Copy(r, newFile, true);
+                // var bytes = File.ReadAllBytes(newFile);
+                // File.Delete(newFile);
+                // totalBytes += bytes.Length;
+                // var stream = new MemoryStream(bytes);
+                // rs.Add(MetadataReference.CreateFromStream(stream));
             }
             References = rs;
             return totalBytes;
