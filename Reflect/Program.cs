@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Reflection.Metadata;
     using System.Runtime.Loader;
     using System.Text;
     using Buildalyzer;
@@ -30,10 +31,49 @@
         
         static void Main(string[] args)
         {
-            new Program().StartReflection();
-            new Program().StartDynamicMethod();
-            new Program().StartCompiler();
+            new Program().StartEFCoreFlow();
+            // new Program().StartReflection();
+            // new Program().StartDynamicMethod();
+            // new Program().StartCompilerFiltered();
+            // IO exception if above "StartCompiler" line is moved down to bottom of method body. related to buildalyzer?
+            // var p = new Program();
+            // p.StartCompilerFail(p.GetReferences());
         }
+
+        void StartEFCoreFlow()
+        {
+            IEnumerable<string> references = GetReferences();
+            var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
+            var comp = new Compiler(new LibraryLoader(loadCtx));
+            var schemaSrc = SchemaSource.Get(@"Data Source=C:\src\dotnet-reflection-test\world.sqlite", "DbSchema");
+            Console.WriteLine(schemaSrc);
+            comp.SetReferences(references);
+            var schemaBuild = comp.Build("DbSchema", schemaSrc);
+            var t = schemaBuild.Item1.ExportedTypes.Where(x => x.Name == "DbContext");
+            var queryBuild = comp.Build("DbQuery", _worldsqliteQuery, schemaBuild.Item2);
+            var queryInstance = queryBuild.Item1.ExportedTypes.Single(x => x.Name == "Program");
+            var inst = Activator.CreateInstance(queryInstance) as IEFQuery;
+            var result = inst.Run();
+            Console.WriteLine("Generated returned {0}", result);
+        }
+
+        string _worldsqliteQuery = @"
+namespace Wrapper
+{
+    using System;
+    using System.Linq;
+    using System.Collections;
+    using System.Collections.Generic;
+
+    public class Program : DbSchema.Ctx, Roslyn.IEFQuery
+    {
+        public int Run()
+        {
+            return city.Where(x => x.Name.ToLower().StartsWith(""ca"")).Count();
+        }
+    }
+}        
+";
         
         void StartReflection()
         {
@@ -49,25 +89,55 @@
 
         void StartCompiler()
         {
+            IEnumerable<string> references = GetReferences();
             var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
             var comp = new Compiler(new LibraryLoader(loadCtx));
-            comp.StartStuff(GetReferences());
+            comp.StartStuff(references);
         }
+
+        IEnumerable<string> MandatoryAssemblies = new [] { "System.Runtime.dll", "System.Console.dll" };
+        void StartCompilerFiltered()
+        {
+            IEnumerable<string> references = GetReferences();
+            var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
+            var comp = new Compiler(new LibraryLoader(loadCtx));
+            var mandatoryAsms = new List<string>();
+            while(references.Any())
+            {
+                var firstRef = references.First();
+                var refs = references.Skip(1);
+                Console.WriteLine("Ref count: {0}", refs.Count());
+                try
+                {
+                    var realAsms = refs.Concat(mandatoryAsms);
+                    comp.StartStuff(realAsms);
+                    references = refs;
+                }
+                catch (Exception exn)
+                {
+                    mandatoryAsms.Add(firstRef);
+                }
+            }
+        }
+
 
         IEnumerable<string> GetReferences()
         {
+            // current asm reference. ... only during dev?
+            var compAsm = typeof(Compiler).GetTypeInfo().Assembly;
+            var asmPath = new Uri(compAsm.CodeBase).LocalPath;
+
             // https://github.com/daveaglick/Buildalyzer
             var projPath = Path.Combine(ProjectPath(), "Reflect", "Reflect.csproj");
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole();
-            var manager = new AnalyzerManager(loggerFactory, LoggerVerbosity.Quiet);
+            var manager = new AnalyzerManager(/*loggerFactory, LoggerVerbosity.Quiet*/);
             var analyzer = manager.GetProject(projPath);
             analyzer.Load();
-            var refs = analyzer.GetReferences();
-            Console.WriteLine("Entity.csproj looks to have about {0} references", refs.Count);
+            var refs = new string[] { asmPath }.Concat(analyzer.GetReferences());
+            Console.WriteLine("Reflect.csproj looks to have about {0} references", refs.Count());
             return refs;
         }
-
 
         string ProjectPath()
         {

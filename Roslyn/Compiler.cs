@@ -10,6 +10,12 @@
     using System.Collections.Generic;
     using System.Text;
 
+    public interface IEFQuery
+    {
+        int Run();
+    }
+
+
     public interface IShared
     {
         int GetAnswer();
@@ -26,23 +32,11 @@
 
         IEnumerable<MetadataReference> References;
 
+        static int i = 0;
         public void StartStuff(IEnumerable<string> references)
         {
-            var totalBytes = 0;
-            var rs = new List<MetadataReference>();
-            foreach(var r in references)
-            {
-                // first, copy the file to some random place
-                var newFile = Path.GetTempFileName();
-                File.Copy(r, newFile, true);
-                var bytes = File.ReadAllBytes(newFile);
-                File.Delete(newFile);
-                totalBytes += bytes.Length;
-                var stream = new MemoryStream(bytes);
-                rs.Add(MetadataReference.CreateFromStream(stream));
-            }
-            References = rs;
-            var res = Build("hejmor", Source);
+            var totalBytes = SetReferences(references);
+            var res = Build("hejmor" + (i++).ToString(), Source); // ensure each generated asm has unique names
             var newType = res.Item1.ExportedTypes.FirstOrDefault(x => x.Name == "MyClass");
             var programInstance = (IShared) Activator.CreateInstance(newType);
             var methodValue = programInstance.GetAnswer();
@@ -63,7 +57,26 @@ public class MyClass : IShared
     }   
 }";
 
-        Tuple<Assembly, MetadataReference> Build(string assmName, string source, MetadataReference schema = null)
+        public int SetReferences(IEnumerable<string> references)
+        {
+            var totalBytes = 0;
+            var rs = new List<MetadataReference>();
+            foreach(var r in references)
+            {
+                // first, copy the file to some random place
+                var newFile = Path.GetTempFileName();
+                File.Copy(r, newFile, true);
+                var bytes = File.ReadAllBytes(newFile);
+                File.Delete(newFile);
+                totalBytes += bytes.Length;
+                var stream = new MemoryStream(bytes);
+                rs.Add(MetadataReference.CreateFromStream(stream));
+            }
+            References = rs;
+            return totalBytes;
+        }
+
+        public Tuple<Assembly, MetadataReference> Build(string assmName, string source, MetadataReference schema = null)
         {
             var currentAssembly = typeof(Compiler).GetTypeInfo().Assembly;
             var fileUri = "file:///";
@@ -79,14 +92,17 @@ public class MyClass : IShared
                 CSharpSyntaxTree.ParseText(source),
             };
 
-            var compilation = CSharpCompilation.Create(assmName)
-                .WithOptions(compilerOptions)
-                .WithReferences(References.Concat(new [] {
-                    MetadataReference.CreateFromFile(asmPath) 
-                }))
+            var schemaRef = schema != null ? new [] { schema } : new MetadataReference[] {};
                 // .Concat(schema != null ? 
                 //     new [] { schema } : new MetadataReference[] {}
                 // )))
+
+
+            var allReferences = schemaRef.Concat(References);
+
+            var compilation = CSharpCompilation.Create(assmName)
+                .WithOptions(compilerOptions)
+                .WithReferences(allReferences)
                 .AddSyntaxTrees(trees);
 
             var stream = new MemoryStream();
@@ -95,7 +111,7 @@ public class MyClass : IShared
             {
                 if (diag.Severity == DiagnosticSeverity.Error)
                 {
-                    //Console.WriteLine("Error: {0}", diag.GetMessage());
+                    Console.WriteLine("Error: {0}", diag.GetMessage());
                 }
             }
             stream.Position = 0;
