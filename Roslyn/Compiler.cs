@@ -59,28 +59,25 @@ public class MyClass : IShared
 
         public int SetReferences(IEnumerable<string> references)
         {
-            
             var totalBytes = 0;
             var rs = new List<MetadataReference>();
             foreach(var r in references)
             {
                 var exists = File.Exists(r);
                 Console.WriteLine("MetaRef: {0} (exists? {1})", r, exists ? "yes" : "no");
-                if (!exists)
-                {
-                    Console.WriteLine("Quitting program because ??");
-                    Environment.Exit(0);
-                }
                 // first, copy the file to some random place
-                // var newFile = Path.GetTempFileName();
-                // File.Copy(r, newFile, true);
-                // var bytes = File.ReadAllBytes(newFile);
-                // File.Delete(newFile);
-                // totalBytes += bytes.Length;
-                // var stream = new MemoryStream(bytes);
-                // rs.Add(MetadataReference.CreateFromStream(stream));
+                var newFile = Path.GetTempFileName();
+                Console.WriteLine("Copy {0} => {1}", r, newFile);
+                File.Copy(r, newFile, true);
+                var bytes = File.ReadAllBytes(newFile);
+                File.Delete(newFile);
+                totalBytes += bytes.Length;
+                var stream = new MemoryStream(bytes);
+                rs.Add(MetadataReference.CreateFromStream(stream));
             }
             References = rs;
+            Console.WriteLine("Quitting program because ??");
+            Environment.Exit(0);
             return totalBytes;
         }
 
