@@ -47,6 +47,7 @@
             {
                 return @"Data Source=C:\src\dotnet-reflection-test\world.sqlite";
             }
+            Console.WriteLine("SQLITE_CONNECTION_STRING: {0}", connStr);
             return connStr;
         }
 
