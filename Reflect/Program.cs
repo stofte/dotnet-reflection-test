@@ -31,6 +31,18 @@
         
         static void Main(string[] args)
         {
+            try
+            {
+
+                var files = Directory.GetFiles("/home/travis/build/stofte/dotnet-reflection-test/Reflect/bin/Debug/netcoreapp2.0");
+                foreach(var f in files)
+                {
+                    Console.WriteLine("File: {0}", f);
+                }
+            }
+            catch
+            { }
+            
             new Program().StartEFCoreFlow();
             // new Program().StartReflection();
             // new Program().StartDynamicMethod();
@@ -137,6 +149,11 @@ namespace Wrapper
             var compAsm = typeof(Compiler).GetTypeInfo().Assembly;
             var asmPath = new Uri(compAsm.CodeBase).LocalPath;
 
+            // if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("TRAVIS")))
+            // {
+            //     asmPath = Path.Combine(Environment.GetEnvironmentVariable("TRAVIS"));
+            // }
+
             // https://github.com/daveaglick/Buildalyzer
             var projPath = Path.Combine(ProjectPath(), "Reflect", "Reflect.csproj");
             var loggerFactory = new LoggerFactory();
@@ -148,6 +165,11 @@ namespace Wrapper
             Console.WriteLine("Reflect.csproj looks to have about {0} references", refs.Count());
             return refs;
         }
+
+        // string ProjectAssembly(string assemblyName)
+        // {
+        //     // on windows, dotnet run outputs dependent projects into the om
+        // }
 
         string ProjectPath()
         {
