@@ -65,7 +65,7 @@ public class MyClass : IShared
             foreach(var r in references)
             {
                 var exists = File.Exists(r);
-                Console.WriteLine("MetaRef: {0} (exists? {0})", r, exists ? "yes" : "no");
+                Console.WriteLine("MetaRef: {0} (exists? {1})", r, exists ? "yes" : "no");
                 if (!exists)
                 {
                     Console.WriteLine("Quitting program because ??");

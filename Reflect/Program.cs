@@ -39,10 +39,11 @@
                 {
                     Console.WriteLine("File: {0}", f);
                 }
+                Environment.Exit(42);
             }
             catch
             { }
-            
+
             new Program().StartEFCoreFlow();
             // new Program().StartReflection();
             // new Program().StartDynamicMethod();
