@@ -58,7 +58,8 @@
             var json = JsonConvert.SerializeObject(refs, Formatting.Indented);
             
             File.WriteAllText(TargetJson(), json);
-            return StartDotnet(runId);
+            return true;
+            // return StartDotnet(runId);
         }
 
         static IEnumerable<string> GetReferences()
