@@ -32,7 +32,6 @@
         static void Main(string[] args)
         {
             var result = new Program().DepsRun();
-            Environment.Exit(result);
             // try
             // {
             //     var files = Directory.GetFiles("/home/travis/build/stofte/dotnet-reflection-test/Reflect/bin/Debug/netcoreapp2.0");
