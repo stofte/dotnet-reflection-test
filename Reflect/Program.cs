@@ -129,6 +129,7 @@
             var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
             var comp = new Compiler(new LibraryLoader(loadCtx));
             var schemaSrc = SchemaSource.Get(GetSqliteConnectionString(), "DbSchema");
+            Console.WriteLine(schemaSrc);
             comp.References = reference;
             var schemaBuild = comp.Build("DbSchema", schemaSrc);
             var t = schemaBuild.Item1.ExportedTypes.Where(x => x.Name == "DbContext");
