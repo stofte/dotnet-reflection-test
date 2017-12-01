@@ -39,3 +39,4 @@ script:
  - chmod +x $TRAVIS_BUILD_DIR/build/Reflect
  - cd $TRAVIS_BUILD_DIR/build
  - ./Reflect
+ - zip test.zip
