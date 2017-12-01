@@ -57,13 +57,15 @@
         {
             var refs = GetOwnDeps();
             var metas = new List<MetadataReference>();
+            var basePath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.CodeBase).LocalPath);
             var bytes = 0;
+            var depsFolderPath = Path.Combine(basePath, "refs");
             foreach(var r in refs)
             {
-                bytes += File.ReadAllBytes(r).Count();
-                metas.Add(MetadataReference.CreateFromFile(r));
+                var fullPath = Path.Combine(depsFolderPath, r);
+                bytes += File.ReadAllBytes(fullPath).Count();
+                metas.Add(MetadataReference.CreateFromFile(fullPath));
             }
-            var basePath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.CodeBase).LocalPath);
             var roslynRef = MetadataReference.CreateFromFile(Path.Combine(basePath, "Roslyn.dll"));
             metas.Add(roslynRef);
             Console.WriteLine("Reference byte count: {0}", bytes);
@@ -101,7 +103,6 @@
                 typeof(System.ComponentModel.DataAnnotations.Schema.ColumnAttribute),
                 typeof(Microsoft.EntityFrameworkCore.DbContext),
                 typeof(System.Runtime.GCSettings)
-
             };
             var metas = new List<MetadataReference>();
             foreach(var t in types)

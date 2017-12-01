@@ -23,12 +23,14 @@
 
         static void Main(string[] args)
         {
+            var createDist = args.Length > 0 && args[0].Contains("dist");
+            var allRefs = GetReferences();
             if (!File.Exists(TargetJson()))
             {
-                var allRefs = GetReferences();
                 MakeRun(0, allRefs);
             }
-            else
+
+            if (createDist)
             {
                 Console.WriteLine("Creating file store");
                 var json = File.ReadAllText(TargetJson());
@@ -45,7 +47,7 @@
                         File.Delete(f);
                     }
                 }
-                foreach(var f in list)
+                foreach(var f in allRefs)
                 {
                     var newName = Path.Combine(TargetFolder(), Path.GetFileName(f));
                     File.Copy(f, newName);
@@ -55,8 +57,7 @@
 
         static bool MakeRun(int runId, IEnumerable<string> refs)
         {
-            var json = JsonConvert.SerializeObject(refs, Formatting.Indented);
-            
+            var json = JsonConvert.SerializeObject(refs.Select(x => Path.GetFileName(x)), Formatting.Indented);
             File.WriteAllText(TargetJson(), json);
             return true;
             // return StartDotnet(runId);
@@ -75,9 +76,7 @@
             foreach(var r in refs)
             {
                 orderedBySize.Add(r, File.ReadAllBytes(r).Count());
-                
             }
-
             return orderedBySize.OrderByDescending(x => x.Value).Select(x => x.Key);
         }
 
