@@ -28,4 +28,4 @@ build_script:
   - 7z a test.zip "%APPVEYOR_BUILD_FOLDER%\build"
 
 artifacts:
-  - path: test.zip
+  - path: build\test.zip
