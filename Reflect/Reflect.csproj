@@ -24,8 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="ref-list.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Update="world.sqlite" CopyToOutputDirectory="PreserveNewest" />
     <None Update="refs\*.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

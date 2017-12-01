@@ -115,13 +115,15 @@
 
         string GetSqliteConnectionString()
         {
-            var connStr = Environment.GetEnvironmentVariable("SQLITE_CONNECTION_STRING");
-            if (string.IsNullOrWhiteSpace(connStr))
-            {
-                return @"Data Source=C:\src\dotnet-reflection-test\world.sqlite";
-            }
-            Console.WriteLine("SQLITE_CONNECTION_STRING: {0}", connStr);
-            return connStr;
+            var basePath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.CodeBase).LocalPath);
+            return string.Format("Data Source={0}", Path.Combine(basePath, "world.sqlite"));
+            // var connStr = Environment.GetEnvironmentVariable("SQLITE_CONNECTION_STRING");
+            // if (string.IsNullOrWhiteSpace(connStr))
+            // {
+            //     return @"Data Source=C:\src\dotnet-reflection-test\world.sqlite";
+            // }
+            // Console.WriteLine("SQLITE_CONNECTION_STRING: {0}", connStr);
+            // return connStr;
         }
 
         int StartEFCoreFlow3(IEnumerable<MetadataReference> reference)
