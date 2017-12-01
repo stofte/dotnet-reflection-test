@@ -20,7 +20,7 @@ build_script:
   - dotnet restore Analyzer
   - dotnet restore Roslyn
   - dotnet restore Reflect
-  - dotnet run -p Analyzer
+  - dotnet run -p Analyzer dist
   - dir %APPVEYOR_BUILD_FOLDER%\Reflect
   - dir %APPVEYOR_BUILD_FOLDER%\Reflect\refs
   - dotnet run -p Reflect
