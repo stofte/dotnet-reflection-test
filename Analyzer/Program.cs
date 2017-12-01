@@ -99,12 +99,6 @@
             return basePath;
         }
 
-        static int _storeCount = 0;
-        static void CreateLocalStore()
-        {
-
-        }
-
         public static bool StartDotnet(int runId)
         {   
             var process = new Process()
