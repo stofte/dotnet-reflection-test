@@ -17,8 +17,10 @@ install:
 # need build_script, or appveyor starts looking for a sln file
 build_script:
   - dotnet restore Entity
+  - dotnet restore Analyze
   - dotnet restore Roslyn
   - dotnet restore Reflect
+  - dotnet run -p Analyze
   - dotnet run -p Reflect
   - dotnet publish -r win10-x64 -f netcoreapp2.0 Reflect\Reflect.csproj -o "%APPVEYOR_BUILD_FOLDER%\build"
   - cd %APPVEYOR_BUILD_FOLDER%\build

@@ -11,11 +11,21 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Buildalyzer" Version="0.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.1.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ref-list.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="refs\*.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

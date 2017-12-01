@@ -30,7 +30,7 @@
             _libraryLoader = libraryLoader;
         }
 
-        IEnumerable<MetadataReference> References;
+        public IEnumerable<MetadataReference> References;
 
         static int i = 0;
         public void StartStuff(IEnumerable<string> references)
@@ -70,6 +70,8 @@ public class MyClass : IShared
                 Console.WriteLine("Copy {0} => {1}", r, newFile);
                 File.Copy(r, newFile, true);
                 var bytes = File.ReadAllBytes(newFile);
+                Console.WriteLine("Delete: {0}", newFile);
+                Console.WriteLine("STILL EXISTS? {0}", File.Exists(r) ? "YES": "NO");
                 File.Delete(newFile);
                 totalBytes += bytes.Length;
                 var stream = new MemoryStream(bytes);

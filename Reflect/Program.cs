@@ -31,25 +31,87 @@
         
         static void Main(string[] args)
         {
-            try
-            {
-
-                var files = Directory.GetFiles("/home/travis/build/stofte/dotnet-reflection-test/Reflect/bin/Debug/netcoreapp2.0");
-                foreach(var f in files)
-                {
-                    Console.WriteLine("File: {0}", f);
-                }
-            }
-            catch
-            { }
-
-            new Program().StartEFCoreFlow();
+            var result = new Program().DepsRun();
+            Environment.Exit(result);
+            // try
+            // {
+            //     var files = Directory.GetFiles("/home/travis/build/stofte/dotnet-reflection-test/Reflect/bin/Debug/netcoreapp2.0");
+            //     foreach(var f in files)
+            //     {
+            //         Console.WriteLine("File: {0}", f);
+            //     }
+            // }
+            // catch
+            // { }
+            // new Program().StartEFCoreFlow2();
+            // new Program().PrintDllLocations();
+            // new Program().StartEFCoreFlow();
             // new Program().StartReflection();
             // new Program().StartDynamicMethod();
             // new Program().StartCompilerFiltered();
             // IO exception if above "StartCompiler" line is moved down to bottom of method body. related to buildalyzer?
             // var p = new Program();
             // p.StartCompilerFail(p.GetReferences());
+        }
+
+        int DepsRun()
+        {
+            var refs = GetOwnDeps();
+            var metas = new List<MetadataReference>();
+            var bytes = 0;
+            foreach(var r in refs)
+            {
+                bytes += File.ReadAllBytes(r).Count();
+                metas.Add(MetadataReference.CreateFromFile(r));
+            }
+            var basePath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.CodeBase).LocalPath);
+            var roslynRef = MetadataReference.CreateFromFile(Path.Combine(basePath, "Roslyn.dll"));
+            metas.Add(roslynRef);
+            Console.WriteLine("Reference byte count: {0}", bytes);
+            return StartEFCoreFlow3(metas);
+        }
+
+        IEnumerable<string> GetOwnDeps()
+        {
+            var basePath = Path.GetDirectoryName(new Uri(typeof(Program).Assembly.CodeBase).LocalPath);
+            var json = File.ReadAllText(Path.Combine(basePath, "ref-list.json"));
+            var refs = JsonConvert.DeserializeObject<IEnumerable<string>>(json);
+            return refs;
+        }
+
+        void PrintDllLocations()
+        {
+            var types = new []
+            {
+                typeof(Compiler),
+                typeof(Object)
+            };
+            foreach(var t in types)
+            {
+                Console.WriteLine("Type {0} => {1}", t.FullName, t.Assembly.CodeBase);
+            }
+        }
+
+        IEnumerable<MetadataReference> GetRuntimeRefs()
+        {
+            
+            var types = new []
+            {
+                typeof(Compiler),
+                typeof(Object),
+                typeof(System.ComponentModel.DataAnnotations.Schema.ColumnAttribute),
+                typeof(Microsoft.EntityFrameworkCore.DbContext),
+                typeof(System.Runtime.GCSettings)
+
+            };
+            var metas = new List<MetadataReference>();
+            foreach(var t in types)
+            {
+                var path = new Uri(t.Assembly.CodeBase).LocalPath;
+                metas.Add(MetadataReference.CreateFromFile(path));
+                Console.WriteLine("Type {0} => {1}", t.FullName, path);
+            }
+            return metas;
         }
 
         string GetSqliteConnectionString()
@@ -61,6 +123,37 @@
             }
             Console.WriteLine("SQLITE_CONNECTION_STRING: {0}", connStr);
             return connStr;
+        }
+
+        int StartEFCoreFlow3(IEnumerable<MetadataReference> reference)
+        {
+            var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
+            var comp = new Compiler(new LibraryLoader(loadCtx));
+            var schemaSrc = SchemaSource.Get(GetSqliteConnectionString(), "DbSchema");
+            comp.References = reference;
+            var schemaBuild = comp.Build("DbSchema", schemaSrc);
+            var t = schemaBuild.Item1.ExportedTypes.Where(x => x.Name == "DbContext");
+            var queryBuild = comp.Build("DbQuery", _worldsqliteQuery, schemaBuild.Item2);
+            var queryInstance = queryBuild.Item1.ExportedTypes.Single(x => x.Name == "Program");
+            var inst = Activator.CreateInstance(queryInstance) as IEFQuery;
+            var result = inst.Run();
+            Console.WriteLine(result == 83 ? "SUCCESS" : "FAILURE");
+            return result;
+        }
+
+        void StartEFCoreFlow2()
+        {
+            var loadCtx = AssemblyLoadContext.GetLoadContext(typeof(Program).GetTypeInfo().Assembly);
+            var comp = new Compiler(new LibraryLoader(loadCtx));
+            var schemaSrc = SchemaSource.Get(GetSqliteConnectionString(), "DbSchema");
+            comp.References = GetRuntimeRefs();
+            var schemaBuild = comp.Build("DbSchema", schemaSrc);
+            var t = schemaBuild.Item1.ExportedTypes.Where(x => x.Name == "DbContext");
+            var queryBuild = comp.Build("DbQuery", _worldsqliteQuery, schemaBuild.Item2);
+            var queryInstance = queryBuild.Item1.ExportedTypes.Single(x => x.Name == "Program");
+            var inst = Activator.CreateInstance(queryInstance) as IEFQuery;
+            var result = inst.Run();
+            Console.WriteLine("Generated returned {0}", result);
         }
 
         void StartEFCoreFlow()
