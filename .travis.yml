@@ -30,10 +30,10 @@ install:
 
 script:
  - dotnet restore Entity
- - dotnet restore Analyze
+ - dotnet restore Analyzer
  - dotnet restore Roslyn
  - dotnet restore Reflect
- - dotnet run -p Analyze
+ - dotnet run -p Analyzer
  - dotnet run -p Reflect
  - dotnet publish -r ubuntu.16.04-x64 -f netcoreapp2.0 Reflect/Reflect.csproj -o "$TRAVIS_BUILD_DIR/build"
  - chmod +x $TRAVIS_BUILD_DIR/build/Reflect
